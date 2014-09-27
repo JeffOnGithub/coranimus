@@ -1,4 +1,4 @@
-coranimus
+Coranimus
 =========
 
 Coranimus is a heart-rate monitor designed to look after your vitals signs for heart and anxiety situations.
