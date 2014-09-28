@@ -1,13 +1,26 @@
 package cc.grenier.coranimus.database;
 
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Comment;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.widget.Toast;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
@@ -144,6 +157,77 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
 		// return count
 		return cursor.getCount();
+	}
+
+	public void exportToXML(Context context) {
+
+		// Select All Query
+		String selectQuery = "SELECT  * FROM " + TABLE_RECORDS;
+
+		SQLiteDatabase db = this.getWritableDatabase();
+		Cursor cursor = db.rawQuery(selectQuery, null);
+
+		try {
+			// Create instance of DocumentBuilderFactory
+			DocumentBuilderFactory factory = DocumentBuilderFactory
+					.newInstance();
+			// Get the DocumentBuilder
+			DocumentBuilder parser = factory.newDocumentBuilder();
+			// Create blank DOM Document
+			Document doc = parser.newDocument();
+			// create the root element
+			Element root = doc.createElement("coranimus");
+			// all it to the xml tree
+			doc.appendChild(root);
+
+			// looping through all rows and adding to list
+			if (cursor.moveToFirst()) {
+				do {
+					// id
+					Element id = doc.createElement(cursor.getString(0));
+					// when_rate_measured
+					Element whenRateMeasured = doc
+							.createElement("whenratemeasured");
+					whenRateMeasured.setNodeValue(cursor.getString(1));
+					id.appendChild(whenRateMeasured);
+					// rate_measured
+					Element rateMeasured = doc
+							.createElement("ratemeasured");
+					whenRateMeasured.setNodeValue(cursor.getString(2));
+					id.appendChild(rateMeasured);
+					// device_adress_used
+					Element deviceAdressUsed = doc
+							.createElement("deviceadressused");
+					whenRateMeasured.setNodeValue(cursor.getString(3));
+					id.appendChild(deviceAdressUsed);
+
+					// Adding record to file
+					root.appendChild(id);
+				} while (cursor.moveToNext());
+			}
+			/*
+			 * // create a comment Comment comment =
+			 * doc.createComment("This is a comment"); // add in the root
+			 * element root.appendChild(comment); // creat child element Element
+			 * childelement = doc.createElement("child"); // Add the attribute
+			 * to the child childelement.setAttribute("value", "1");
+			 * root.appendChild(childelement);
+			 */
+
+			TransformerFactory transformerfactory = TransformerFactory
+					.newInstance();
+			Transformer transformer = transformerfactory.newTransformer();
+
+			DOMSource source = new DOMSource(doc);
+			FileOutputStream _stream = context.openFileOutput("NewDom.xml",
+					context.MODE_PRIVATE);
+			StreamResult result = new StreamResult(_stream);
+			transformer.transform(source, result);
+			Toast.makeText(context, "XML File created", Toast.LENGTH_LONG)
+					.show();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 
 }

@@ -14,6 +14,7 @@
     <string name="unknown_device">Unknown device</string>
     <string name="title_activity_settings">Settings</string>
     <string name="no_beat">No data</string>
+    <string name="export_to_xml">Export saved data in a XML file</string>
 
     <!-- Menu items -->
     <string name="menu_connect">Connect</string>
