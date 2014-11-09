@@ -5,11 +5,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import cc.grenier.coranimus.database.DatabaseHandler;
 import cc.grenier.coranimus.database.Record;
@@ -22,9 +25,20 @@ public class ViewRecordsActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_view_records);
-
-		// Reading all records
+		
 		DatabaseHandler db = new DatabaseHandler(this);
+		
+		final Button button = (Button) findViewById(R.id.buttonExport);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Perform action on click
+            	DatabaseHandler dbexport = new DatabaseHandler(ViewRecordsActivity.this);
+            	dbexport.exportToXML(getApplicationContext());
+             }
+        });
+        
+		// Reading all records
+		
         Log.d("Reading: ", "Reading all records.."); 
         List<Record> records = db.getAllRecords();     
    
@@ -43,6 +57,8 @@ public class ViewRecordsActivity extends Activity {
         
      // Set the ArrayAdapter as the ListView's adapter.  
         mainListView.setAdapter( listAdapter ); 
+        
+        
 		
 	}
 

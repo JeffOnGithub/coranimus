@@ -6,12 +6,12 @@ import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -20,6 +20,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 import android.widget.Toast;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
@@ -160,7 +161,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	}
 
 	public void exportToXML(Context context) {
-
+		
 		// Select All Query
 		String selectQuery = "SELECT  * FROM " + TABLE_RECORDS;
 
@@ -179,30 +180,36 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 			Element root = doc.createElement("coranimus");
 			// all it to the xml tree
 			doc.appendChild(root);
-
+			Log.e("XML Export","step 1");
 			// looping through all rows and adding to list
 			if (cursor.moveToFirst()) {
 				do {
+					String cursor1 = cursor.getString(0);
+					String cursor2 = cursor.getString(1);
+					String cursor3 = cursor.getString(2);
+					String cursor4 = cursor.getString(3);
+					
 					// id
-					Element id = doc.createElement(cursor.getString(0));
+					Element id = doc.createElement("id" + cursor1);
 					// when_rate_measured
 					Element whenRateMeasured = doc
 							.createElement("whenratemeasured");
-					whenRateMeasured.setNodeValue(cursor.getString(1));
+					whenRateMeasured.appendChild(doc.createTextNode(cursor2));
 					id.appendChild(whenRateMeasured);
 					// rate_measured
 					Element rateMeasured = doc
 							.createElement("ratemeasured");
-					whenRateMeasured.setNodeValue(cursor.getString(2));
+					rateMeasured.appendChild(doc.createTextNode(cursor3));
 					id.appendChild(rateMeasured);
 					// device_adress_used
 					Element deviceAdressUsed = doc
 							.createElement("deviceadressused");
-					whenRateMeasured.setNodeValue(cursor.getString(3));
+					deviceAdressUsed.appendChild(doc.createTextNode(cursor4));
 					id.appendChild(deviceAdressUsed);
-
+					
 					// Adding record to file
 					root.appendChild(id);
+					
 				} while (cursor.moveToNext());
 			}
 			/*
@@ -213,20 +220,23 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 			 * to the child childelement.setAttribute("value", "1");
 			 * root.appendChild(childelement);
 			 */
-
+			Log.e("XML Export","step 2");
 			TransformerFactory transformerfactory = TransformerFactory
 					.newInstance();
 			Transformer transformer = transformerfactory.newTransformer();
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 
-			DOMSource source = new DOMSource(doc);
-			FileOutputStream _stream = context.openFileOutput("NewDom.xml",
+			DOMSource source = new DOMSource(doc); //TODO name output file with datetime
+			FileOutputStream _stream = context.openFileOutput("CoranimusExtract.xml",
 					context.MODE_PRIVATE);
 			StreamResult result = new StreamResult(_stream);
 			transformer.transform(source, result);
 			Toast.makeText(context, "XML File created", Toast.LENGTH_LONG)
 					.show();
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			Log.e("XML Export",ex.toString());
+			Toast.makeText(context, "XML File creation failed", Toast.LENGTH_LONG).show();
 		}
 	}
 
